@@ -14,7 +14,22 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider 
+      appearance={{
+        layout: {
+          socialButtonsVariant: 'blockButton'
+        },
+        variables: {
+          colorBackground: '#1c1c1e',
+          colorInputBackground: '#2c2c2e',
+          colorInputText: '#ffffff',
+          colorText: '#ffffff',
+          colorTextSecondary: '#a1a1aa',
+          colorPrimary: '#ffffff',
+          colorTextOnPrimaryBackground: '#000000'
+        }
+      }}
+    >
       <html lang="en" className="dark" suppressHydrationWarning>
         <body className={inter.className}>
           <Header />

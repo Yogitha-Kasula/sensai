@@ -18,7 +18,7 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   return NextResponse.next();
-});
+}, { clockSkewInMs: 5 * 60 * 1000 }); // 5 minutes leeway for clock drift
 
 export const config = {
   matcher: [

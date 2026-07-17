@@ -15,7 +15,8 @@ const Header = () => {
             alt="Sensai Logo" 
             width={200} 
             height={60} 
-            className="h-12 py-1 w-auto object-contain" 
+            className="h-12 py-1 w-auto object-contain"
+            priority 
           />
         </Link>
         
@@ -60,9 +61,9 @@ const Header = () => {
           </SignedIn>
           
           <SignedOut>
-            <SignInButton forceRedirectUrl="/dashboard" mode="modal">
+            <Link href="/sign-in">
               <Button variant="outline">Sign In</Button>
-            </SignInButton>
+            </Link>
           </SignedOut>
 
           <SignedIn>
@@ -70,8 +71,19 @@ const Header = () => {
               appearance={{
                 elements: {
                   avatarBox: "w-10 h-10",
-                  userButtonPopoverCard: "shadow-xl",
-                  userPreviewMainIdentifier: "font-semibold",
+                  userButtonPopoverCard: { backgroundColor: '#1c1c1e' },
+                  userPreviewMainIdentifier: { color: 'white', fontWeight: '600' },
+                  userPreviewSecondaryIdentifier: { color: '#a1a1aa' },
+                  userButtonPopoverActionButton: { 
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: '#2c2c2e',
+                      color: 'white'
+                    }
+                  },
+                  userButtonPopoverActionButtonText: { color: 'white' },
+                  userButtonPopoverActionButtonIcon: { color: 'white' },
+                  userButtonPopoverFooter: { color: '#a1a1aa' },
                 },
               }}
               afterSignOutUrl="/"
