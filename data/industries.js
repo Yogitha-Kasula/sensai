@@ -1,0 +1,58 @@
+export const industries = [
+  {
+    id: "tech",
+    name: "Information Technology",
+    subIndustries: [
+      "Software Development",
+      "Data Science",
+      "Cybersecurity",
+      "Cloud Computing",
+      "IT Support",
+    ],
+  },
+  {
+    id: "healthcare",
+    name: "Healthcare & Life Sciences",
+    subIndustries: [
+      "Healthcare Services",
+      "Biotechnology",
+      "Pharmaceuticals",
+      "Medical Devices",
+      "Healthcare IT",
+      "Telemedicine",
+      "Mental Health Services",
+      "Genomics",
+      "Clinical Research",
+      "Healthcare Analytics",
+      "Elder Care Services",
+      "Veterinary Services",
+      "Alternative Medicine",
+    ],
+  },
+  {
+    id: "finance",
+    name: "Finance & Banking",
+    subIndustries: [
+      "Investment Banking",
+      "Wealth Management",
+      "Fintech",
+      "Accounting",
+      "Insurance",
+      "Payment Processing",
+      "Credit Services",
+    ],
+  },
+  {
+    id: "marketing",
+    name: "Marketing & Advertising",
+    subIndustries: [
+      "Digital Marketing",
+      "Content Creation",
+      "SEO/SEM",
+      "Public Relations",
+      "Brand Management",
+      "Market Research",
+      "Event Planning",
+    ],
+  },
+];

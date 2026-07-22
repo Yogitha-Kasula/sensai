@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/ui/header";
 import { ClerkProvider } from "@clerk/nextjs";
+import { checkUser } from "@/lib/checkUser";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -12,7 +13,9 @@ export const metadata = {
   description: "",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  await checkUser();
+
   return (
     <ClerkProvider 
       appearance={{
