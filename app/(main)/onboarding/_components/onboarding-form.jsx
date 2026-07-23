@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { onboardingSchema } from "@/lib/schema";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -16,6 +16,9 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import useFetch from "@/hooks/use-fetch";
 import {
   Select,
   SelectContent,
@@ -38,31 +41,43 @@ const OnboardingForm = ({ industries }) => {
     resolver: zodResolver(onboardingSchema),
   });
 
+  const {
+    loading: updateLoading,
+    fn: updateUserFn,
+    data: updateResult,
+  } = useFetch(updateUser);
+
   const watchIndustry = watch("industry");
   const selectedIndustryObj = industries.find((ind) => ind.id === watchIndustry);
 
   const onSubmit = async (values) => {
     try {
-      // Format the values to match the expected database structure
-      // (Convert experience string to number, and split skills string into an array)
+      const formattedIndustry = `${values.industry}-${values.subIndustry}`
+        .toLowerCase()
+        .replace(/ /g, "-");
+
       const formattedValues = {
         ...values,
+        industry: formattedIndustry,
         experience: parseInt(values.experience, 10),
         skills: typeof values.skills === "string" 
           ? values.skills.split(",").map((s) => s.trim()).filter(Boolean)
           : values.skills,
       };
       
-      const result = await updateUser(formattedValues);
-
-      if (result?.success) {
-        // Form submitted successfully, database updated!
-        router.push("/dashboard");
-      }
+      await updateUserFn(formattedValues);
     } catch (error) {
-      console.error("Form submission error:", error);
+      console.error("Onboarding error:", error);
     }
   };
+
+  useEffect(() => {
+    if (updateResult?.success && !updateLoading) {
+      toast.success("Profile completed successfully!");
+      router.push("/dashboard");
+      router.refresh();
+    }
+  }, [updateResult, updateLoading, router]);
 
   return (
     <div className="flex items-center justify-center bg-background mt-24">
@@ -172,8 +187,15 @@ const OnboardingForm = ({ industries }) => {
               )}
             </div>
 
-            <Button type="submit" className="w-full">
-              Complete Profile
+            <Button type="submit" className="w-full" disabled={updateLoading}>
+              {updateLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Complete Profile"
+              )}
             </Button>
           </form>
         </CardContent>
