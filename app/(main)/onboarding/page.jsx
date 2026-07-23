@@ -7,9 +7,9 @@ const OnboardingPage = async () => {
   // Check if user is already onboarded
   const { isOnboarded } = await getUserOnboardingStatus();
 
-  if (isOnboarded) {
-    redirect("/dashboard");
-  }
+  // if (isOnboarded) {
+  //   redirect("/dashboard");
+  // }
 
   return (
     <main>

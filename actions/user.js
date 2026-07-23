@@ -3,6 +3,7 @@
 import { db } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import { generateAIInsights } from "./dashboard";
 
 export async function updateUser(data) {
   const { userId } = await auth();
@@ -20,28 +21,27 @@ export async function updateUser(data) {
   }
 
   try {
-    // Start a transaction to handle both user update and industry insight creation
+    // Check if industry insight already exists
+    let industryInsight = await db.industryInsight.findUnique({
+      where: { industry: data.industry },
+    });
+
+    // If it doesn't exist, generate AI insights BEFORE starting the transaction
+    // This prevents the transaction from timing out due to slow API calls
+    let insights;
+    if (!industryInsight) {
+      insights = await generateAIInsights(data.industry);
+    }
+
     const result = await db.$transaction(
       async (tx) => {
-        // Find if the industry insight already exists
-        let industryInsight = await tx.industryInsight.findUnique({
-          where: { industry: data.industry },
-        });
-
-        // If it doesn't exist, create it with default values
-        // This will be populated by an Inngest background job later
-        if (!industryInsight) {
+        // Create the industry insight if we just generated it
+        if (!industryInsight && insights) {
           industryInsight = await tx.industryInsight.create({
             data: {
               industry: data.industry,
-              salaryRanges: [],
-              growthRate: 0,
-              demandLevel: "MEDIUM",
-              topSkills: [],
-              marketOutlook: "NEUTRAL",
-              keyTrends: [],
-              recommendedSkills: [],
-              nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 1 week from now
+              ...insights,
+              nextUpdate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
             },
           });
         }
@@ -60,7 +60,7 @@ export async function updateUser(data) {
         return { updatedUser, industryInsight };
       },
       {
-        timeout: 10000, // default: 5000
+        timeout: 10000, 
       }
     );
 

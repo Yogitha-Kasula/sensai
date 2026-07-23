@@ -1,7 +1,19 @@
-import React from "react";
+import { getIndustryInsights } from "@/actions/dashboard";
+import DashboardView from "./_components/dashboard-view";
+import { redirect } from "next/navigation";
 
-const IndustryInsightsPage = () => {
-  return <div>IndustryInsightsPage</div>;
+const IndustryInsightsPage = async () => {
+  const insights = await getIndustryInsights();
+
+  if (!insights) {
+    redirect("/onboarding");
+  }
+
+  return (
+    <div>
+      <DashboardView insights={insights} />
+    </div>
+  );
 };
 
 export default IndustryInsightsPage;
