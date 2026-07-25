@@ -5,22 +5,14 @@ import { Button } from "./ui/button";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { X } from "lucide-react";
 import QuizResult from "./quiz-result";
 
 export default function QuizList({ assessments }) {
   const router = useRouter();
   const [selectedQuiz, setSelectedQuiz] = useState(null);
 
-  if (selectedQuiz) {
-    return (
-      <div className="mt-8">
-        <Button variant="ghost" onClick={() => setSelectedQuiz(null)} className="mb-4">
-          &larr; Back to Quizzes
-        </Button>
-        <QuizResult result={selectedQuiz} hideStartNew={true} />
-      </div>
-    );
-  }
+
 
   return (
     <div className="mt-8">
@@ -64,6 +56,23 @@ export default function QuizList({ assessments }) {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {selectedQuiz && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setSelectedQuiz(null)}>
+          <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-background border rounded-lg shadow-lg p-6" onClick={(e) => e.stopPropagation()}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute right-4 top-4" 
+              onClick={() => setSelectedQuiz(null)}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </Button>
+            <QuizResult result={selectedQuiz} hideStartNew={true} />
+          </div>
         </div>
       )}
     </div>

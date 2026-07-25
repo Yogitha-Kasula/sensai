@@ -1,6 +1,7 @@
 import { Trophy, CheckCircle2, XCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 
 export default function QuizResult({ result, hideStartNew, onStartNew }) {
@@ -15,9 +16,10 @@ export default function QuizResult({ result, hideStartNew, onStartNew }) {
       
       {/* Score */}
       <div className="my-8 text-center">
-        <p className="text-5xl font-bold font-gradient">
+        <p className="text-5xl font-bold font-gradient mb-4">
           {result.quizScore.toFixed(1)}%
         </p>
+        <Progress value={result.quizScore} className="w-full" />
       </div>
 
       {/* Improvement Tip */}
