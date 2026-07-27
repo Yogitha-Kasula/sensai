@@ -48,13 +48,13 @@ const HeroSection = () => {
             </Button>
           </Link>
 
-          <Link href="https://www.youtube.com/roadsidecoder">
+          <Link href="#how-it-works">
             <Button
               size="lg"
               className="px-8"
               variant="outline"
             >
-              Get Started
+              Learn More
             </Button>
           </Link>
         </div>
