@@ -316,11 +316,11 @@ export default function ResumeBuilder({ initialContent }) {
               <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Full Name</Label>
-                  <Input placeholder="John Doe" {...register("contactInfo.name")} />
+                  <Input placeholder="John Doe" {...register("contactInfo.name")} autoComplete="new-password" />
                 </div>
                 <div className="space-y-2">
                   <Label>Email</Label>
-                  <Input placeholder="your@email.com" {...register("contactInfo.email")} type="email" className={errors.contactInfo?.email ? "border-red-500" : ""} />
+                  <Input placeholder="your@email.com" {...register("contactInfo.email")} type="email" autoComplete="new-password" className={errors.contactInfo?.email ? "border-red-500" : ""} />
                   {errors.contactInfo?.email && <p className="text-xs text-red-500">{errors.contactInfo.email.message}</p>}
                 </div>
                 <div className="space-y-2">
@@ -573,11 +573,27 @@ export default function ResumeBuilder({ initialContent }) {
                     </div>
                     <div className="space-y-2">
                       <Label>Start Year</Label>
-                      <Input type="number" placeholder="2018" {...register(`education.${index}.startYear`)} />
+                      <Input 
+                        type="number" 
+                        placeholder="2018" 
+                        {...register(`education.${index}.startYear`)} 
+                        onKeyDown={(e) => ['e', 'E', '+', '-', '.'].includes(e.key) && e.preventDefault()}
+                        onInput={(e) => {
+                          if (e.target.value.length > 4) e.target.value = e.target.value.slice(0, 4);
+                        }}
+                      />
                     </div>
                     <div className="space-y-2">
                       <Label>End Year</Label>
-                      <Input type="number" placeholder="2022" {...register(`education.${index}.endYear`)} />
+                      <Input 
+                        type="number" 
+                        placeholder="2022" 
+                        {...register(`education.${index}.endYear`)} 
+                        onKeyDown={(e) => ['e', 'E', '+', '-', '.'].includes(e.key) && e.preventDefault()}
+                        onInput={(e) => {
+                          if (e.target.value.length > 4) e.target.value = e.target.value.slice(0, 4);
+                        }}
+                      />
                     </div>
                     <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-600 w-fit md:col-span-2" onClick={() => removeEdu(index)}>
                       <Trash2 className="h-4 w-4 mr-2" /> Remove Education
