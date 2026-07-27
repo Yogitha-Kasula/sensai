@@ -1,3 +1,4 @@
+import Link from "next/link";
 import HeroSection from "@/components/hero";
 import FaqSection from "@/components/faq-section";
 import { Button } from "@/components/ui/button";
@@ -211,9 +212,11 @@ export default function Home() {
           <p className="text-lg md:text-xl mb-10 max-w-2xl mx-auto text-gray-700">
             Join thousands of professionals who are advancing their careers with AI-powered guidance.
           </p>
-          <Button size="lg" className="px-8 bg-gray-900 text-gray-50 hover:bg-gray-800 rounded-md group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-            Start Your Journey Today <ArrowRight className="ml-2 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
-          </Button>
+          <Link href="/dashboard">
+            <Button size="lg" className="px-8 bg-gray-900 text-gray-50 hover:bg-gray-800 rounded-md group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+              Start Your Journey Today <ArrowRight className="ml-2 w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+            </Button>
+          </Link>
         </div>
       </section>
     </div>
