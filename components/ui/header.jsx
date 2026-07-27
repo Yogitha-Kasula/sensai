@@ -70,7 +70,7 @@ const Header = () => {
             <UserButton
               appearance={{
                 elements: {
-                  avatarBox: "w-10 h-10",
+                  avatarBox: { width: '40px', height: '40px' },
                   userButtonPopoverCard: { backgroundColor: '#1c1c1e' },
                   userPreviewMainIdentifier: { color: 'white', fontWeight: '600' },
                   userPreviewSecondaryIdentifier: { color: '#a1a1aa' },

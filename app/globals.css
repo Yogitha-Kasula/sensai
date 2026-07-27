@@ -127,6 +127,13 @@
   html {
     @apply font-sans;
   }
+
+  /* Ensure native calendar icons are visible in dark mode */
+  .dark input[type="month"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.6;
+    cursor: pointer;
+  }
 }
 
 .grid-background {
@@ -187,4 +194,17 @@
 
 .hero-image.scrolled {
   transform: rotateX(0deg) scale(1) translateY(40px);
+}
+
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print\:block {
+    display: block !important;
+  }
 }
