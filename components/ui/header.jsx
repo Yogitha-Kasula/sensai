@@ -57,6 +57,12 @@ const Header = () => {
                     Interview Prep
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link href="/onboarding" className="flex items-center gap-2 w-full">
+                    <UserCog className="h-4 w-4" />
+                    Edit Profile
+                  </Link>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </SignedIn>
@@ -88,16 +94,7 @@ const Header = () => {
                 },
               }}
               afterSignOutUrl="/"
-            >
-              <UserButton.MenuItems>
-                <UserButton.Action label="manageAccount" />
-                <UserButton.Link 
-                  label="Edit Profile" 
-                  labelIcon={<UserCog className="w-4 h-4" />} 
-                  href="/onboarding" 
-                />
-              </UserButton.MenuItems>
-            </UserButton>
+            />
           </SignedIn>
         </div>
       </nav>
