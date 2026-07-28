@@ -92,3 +92,17 @@ export async function getUserOnboardingStatus() {
   }
 }
 
+export async function getUserProfile() {
+  const { userId } = await auth();
+  if (!userId) throw new Error("Unauthorized");
+
+  try {
+    const user = await db.user.findUnique({
+      where: { clerkUserId: userId },
+    });
+    return user;
+  } catch (error) {
+    console.error("Error fetching user profile:", error.message);
+    throw new Error("Failed to get profile");
+  }
+}

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import { Button } from "./button";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./dropdown-menu";
+import { UserCog } from "lucide-react";
 
 const Header = () => {
   return (
@@ -87,7 +88,16 @@ const Header = () => {
                 },
               }}
               afterSignOutUrl="/"
-            />
+            >
+              <UserButton.MenuItems>
+                <UserButton.Action label="manageAccount" />
+                <UserButton.Link 
+                  label="Edit Profile" 
+                  labelIcon={<UserCog className="w-4 h-4" />} 
+                  href="/onboarding" 
+                />
+              </UserButton.MenuItems>
+            </UserButton>
           </SignedIn>
         </div>
       </nav>

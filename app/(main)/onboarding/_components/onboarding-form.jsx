@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/select";
 import { updateUser } from "@/actions/user";
 
-const OnboardingForm = ({ industries }) => {
+const OnboardingForm = ({ industries, initialData }) => {
   const router = useRouter();
 
   const {
@@ -39,6 +39,13 @@ const OnboardingForm = ({ industries }) => {
     watch,
   } = useForm({
     resolver: zodResolver(onboardingSchema),
+    defaultValues: {
+      industry: initialData?.industry || "",
+      subIndustry: initialData?.subIndustry || "",
+      experience: initialData?.experience || "",
+      skills: initialData?.skills ? initialData.skills.join(", ") : "",
+      bio: initialData?.bio || "",
+    },
   });
 
   const {
@@ -83,7 +90,9 @@ const OnboardingForm = ({ industries }) => {
     <div className="flex items-center justify-center bg-background mt-24">
       <Card className="w-full max-w-lg mt-10 mx-2">
         <CardHeader>
-          <CardTitle className="gradient-title text-4xl">Complete Your Profile</CardTitle>
+          <CardTitle className="gradient-title text-4xl">
+            {initialData ? "Edit Your Profile" : "Complete Your Profile"}
+          </CardTitle>
           <CardDescription>
             Select your industry to get personalized career insights and recommendations.
           </CardDescription>
@@ -194,7 +203,7 @@ const OnboardingForm = ({ industries }) => {
                   Saving...
                 </>
               ) : (
-                "Complete Profile"
+                initialData ? "Update Profile" : "Complete Profile"
               )}
             </Button>
           </form>
