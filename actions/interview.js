@@ -6,20 +6,20 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
-  model: "gemini-3.8-flash",
+  model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
 });
+
+// Retry only on 503 (temporary overload). Never retry on 429 (quota).
 async function generateWithRetry(prompt, retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
       return await model.generateContent(prompt);
     } catch (err) {
-      const busy = err.status === 503 || err.status === 429;
-      if (!busy || i === retries - 1) throw err;
-      await new Promise((r) => setTimeout(r, 1000 * 2 ** i)); // wait 1s, 2s, 4s
+      if (err?.status !== 503 || i === retries - 1) throw err;
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** i)); // wait 1s, 2s
     }
   }
 }
-
 
 export async function generateQuiz() {
   try {
@@ -57,8 +57,7 @@ export async function generateQuiz() {
   `;
 
     const result = await generateWithRetry(prompt);
-    const response = result.response;
-    const text = response.text();
+    const text = result.response.text();
 
     let quiz;
     try {
@@ -75,6 +74,9 @@ export async function generateQuiz() {
     return quiz.questions;
   } catch (error) {
     console.error("Error generating quiz:", error);
+    if (error?.status === 429) {
+      throw new Error("AI daily limit reached. Please try again later.");
+    }
     throw new Error(error.message || "Failed to generate quiz questions");
   }
 }
@@ -126,6 +128,7 @@ export async function saveQuizResult(questions, answers, score) {
         const tipResult = await generateWithRetry(improvementPrompt);
         improvementTip = tipResult.response.text().trim();
       } catch (error) {
+        // If the AI tip fails (e.g. quota), still save the quiz result
         console.error("Error generating improvement tip:", error);
       }
     }
