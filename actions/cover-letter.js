@@ -6,19 +6,21 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { revalidatePath } from "next/cache";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
+const model = genAI.getGenerativeModel({
+  model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
+});
+
+// Retry only on 503 (temporary overload). Never retry on 429 (quota).
 async function generateWithRetry(prompt, retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
       return await model.generateContent(prompt);
     } catch (err) {
-      const busy = err.status === 503 || err.status === 429;
-      if (!busy || i === retries - 1) throw err;
-      await new Promise((r) => setTimeout(r, 1000 * 2 ** i)); // wait 1s, 2s, 4s
+      if (err?.status !== 503 || i === retries - 1) throw err;
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** i)); // wait 1s, 2s
     }
   }
 }
-
 
 export async function generateCoverLetter(data) {
   try {
@@ -70,11 +72,10 @@ export async function generateCoverLetter(data) {
     `;
 
     const result = await generateWithRetry(prompt);
-    const response = result.response;
-    let content = response.text().trim();
+    let content = result.response.text().trim();
 
     // Strip Markdown code block syntax if Gemini added it
-    content = content.replace(/^```[\w]*\n?/g, "").replace(/```$/g, "").trim();
+    content = content.replace(/^```[\w]*\n?/, "").replace(/```$/, "").trim();
 
     const coverLetter = await db.coverLetter.create({
       data: {
@@ -90,6 +91,9 @@ export async function generateCoverLetter(data) {
     return { success: true, coverLetter };
   } catch (error) {
     console.error("Error generating cover letter:", error);
+    if (error?.status === 429) {
+      throw new Error("AI daily limit reached. Please try again later.");
+    }
     throw new Error(error.message || "Failed to generate cover letter");
   }
 }
