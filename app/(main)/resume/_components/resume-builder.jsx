@@ -101,12 +101,12 @@ export default function ResumeBuilder({ initialContent }) {
     }
   };
 
-  const handleImproveWithAI = async (type, index = null) => {
+    const handleImproveWithAI = async (type, index = null) => {
     setIsImproving(true);
     try {
       let currentText = "";
       let fieldPath = "";
-      
+
       if (type === "summary") {
         currentText = getValues("summary");
         fieldPath = "summary";
@@ -114,14 +114,20 @@ export default function ResumeBuilder({ initialContent }) {
         currentText = getValues(`experience.${index}.description`);
         fieldPath = `experience.${index}.description`;
       }
-      
-      if (!currentText) {
+
+      if (!currentText || !currentText.trim()) {
         toast.error("Please write something first to improve it.");
         return;
       }
-      
-      const improvedText = await improveWithAI({ current: currentText, type });
-      setValue(fieldPath, improvedText);
+
+      const res = await improveWithAI({ current: currentText, type });
+
+      if (!res?.success) {
+        toast.error(res?.error || "Failed to improve content");
+        return;
+      }
+
+      setValue(fieldPath, res.text, { shouldDirty: true });
       toast.success("Content improved by AI!");
     } catch (error) {
       toast.error(error.message || "Failed to improve content");
