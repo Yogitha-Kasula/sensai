@@ -6,7 +6,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { revalidatePath } from "next/cache";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
 
 export async function saveResume(content) {
   try {
@@ -91,7 +92,21 @@ export async function improveWithAI({ current, type }) {
       IMPORTANT: Return ONLY the improved text. Do not include any conversational text like "Here is the improved version" or "Here you go". Do not wrap the text in markdown blocks or quotes. Just the raw text.
     `;
 
-    const result = await model.generateContent(prompt);
+        // Retry up to 3 times if Google returns a 503 high demand spike
+    let result;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        result = await model.generateContent(prompt);
+        break;
+      } catch (err) {
+        if (attempt < 2) {
+          await new Promise((res) => setTimeout(res, 1500)); // wait 1.5s
+          continue;
+        }
+        throw err;
+      }
+    }
+
     const response = result.response;
     let text = response.text().trim();
 
