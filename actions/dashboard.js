@@ -9,6 +9,18 @@ const model = genAI.getGenerativeModel({
   model: "gemini-flash-latest",
 });
 
+async function generateWithRetry(prompt, retries = 4) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await model.generateContent(prompt);
+    } catch (err) {
+      const busy = err.status === 503 || err.status === 429;
+      if (!busy || i === retries - 1) throw err;
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** i)); // wait 1s, 2s, 4s
+    }
+  }
+}
+
 export const generateAIInsights = async (industry) => {
   const prompt = `
     Analyze the current state of the ${industry} industry and provide insights in ONLY the following JSON format without any additional notes or explanations:
@@ -31,12 +43,14 @@ export const generateAIInsights = async (industry) => {
     Make skills concise (e.g., "Python", "Cloud Computing") - maximum 2-3 words per skill.
   `;
 
-  const result = await model.generateContent(prompt);
+  const result = await generateWithRetry(prompt);
   const response = result.response;
   const text = response.text();
   const cleanedText = text.replace(/```(?:json)?\n?/g, "").trim();
 
-  return JSON.parse(cleanedText);
+  const start = cleanedText.indexOf("{");
+  const end = cleanedText.lastIndexOf("}");
+  return JSON.parse(cleanedText.substring(start, end + 1));
 };
 
 export async function getIndustryInsights() {
