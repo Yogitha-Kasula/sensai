@@ -8,7 +8,17 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({
   model: "gemini-3.8-flash",
 });
-
+async function generateWithRetry(prompt, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await model.generateContent(prompt);
+    } catch (err) {
+      const busy = err.status === 503 || err.status === 429;
+      if (!busy || i === retries - 1) throw err;
+      await new Promise((r) => setTimeout(r, 1000 * 2 ** i)); // wait 1s, 2s, 4s
+    }
+  }
+}
 
 
 export async function generateQuiz() {
@@ -46,7 +56,7 @@ export async function generateQuiz() {
     }
   `;
 
-    const result = await model.generateContent(prompt);
+    const result = await generateWithRetry(prompt);
     const response = result.response;
     const text = response.text();
 
@@ -113,7 +123,7 @@ export async function saveQuizResult(questions, answers, score) {
     `;
 
       try {
-        const tipResult = await model.generateContent(improvementPrompt);
+        const tipResult = await generateWithRetry(improvementPrompt);
         improvementTip = tipResult.response.text().trim();
       } catch (error) {
         console.error("Error generating improvement tip:", error);
