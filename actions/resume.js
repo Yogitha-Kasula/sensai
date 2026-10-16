@@ -6,9 +6,9 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { revalidatePath } from "next/cache";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
-
-
+const model = genAI.getGenerativeModel({
+  model: process.env.GEMINI_MODEL || "gemini-3.8-flash",
+});
 
 export async function saveResume(content) {
   try {
@@ -80,11 +80,15 @@ export async function improveWithAI({ current, type }) {
 
     if (!user) throw new Error("User not found");
 
+    if (!current || !current.trim()) {
+      return { success: false, error: "Please write something first." };
+    }
+
     const prompt = `
       As an expert resume writer, improve the following ${type} description for a ${user.industry} professional.
       Make it more professional, impactful, and quantifiable where possible.
       Keep it concise and focus on achievements over responsibilities.
-      
+
       CRITICAL INSTRUCTION: If the provided text is very brief or vague (e.g., "I started my journey", "Did some coding"), do NOT hallucinate or invent completely unrelated technical skills, methodologies, or specific experiences. Simply improve the phrasing of what the user actually provided while keeping it grounded.
 
       Current ${type}:
@@ -93,35 +97,40 @@ export async function improveWithAI({ current, type }) {
       IMPORTANT: Return ONLY the improved text. Do not include any conversational text like "Here is the improved version" or "Here you go". Do not wrap the text in markdown blocks or quotes. Just the raw text.
     `;
 
-        // Retry up to 3 times if Google returns a 503 high demand spike
+    // Retry only on 503 (temporary overload). Never retry on 429 (quota).
     let result;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
         result = await model.generateContent(prompt);
         break;
       } catch (err) {
-        if (attempt < 2) {
-          await new Promise((res) => setTimeout(res, 1500)); // wait 1.5s
+        if (err?.status === 503 && attempt < 2) {
+          await new Promise((res) => setTimeout(res, 1500));
           continue;
         }
         throw err;
       }
     }
 
-    const response = result.response;
-    let text = response.text().trim();
+    let text = result.response.text().trim();
 
     // Strip markdown formatting if AI ignored instructions
-    text = text.replace(/^```[\w]*\n?/g, "").replace(/```$/g, "").trim();
-    
+    text = text.replace(/^```[\w]*\n?/, "").replace(/```$/, "").trim();
+
     // Strip surrounding quotes if AI wrapped the text
     if (text.startsWith('"') && text.endsWith('"')) {
       text = text.slice(1, -1).trim();
     }
 
-    return text;
+    return { success: true, text };
   } catch (error) {
     console.error("Error improving with AI:", error);
-    throw new Error("Failed to improve content");
+    if (error?.status === 429) {
+      return {
+        success: false,
+        error: "AI daily limit reached. Please try again later.",
+      };
+    }
+    return { success: false, error: "Failed to improve content" };
   }
 }
